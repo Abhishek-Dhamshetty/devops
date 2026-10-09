@@ -1,0 +1,11 @@
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import api from '../services/api'
+
+const categories = ['Maintenance', 'Classroom', 'Electrical', 'Cleanliness', 'Water Supply', 'Canteen', 'Hostel', 'Other']
+export default function SubmitComplaint() {
+  const navigate = useNavigate(); const [form, setForm] = useState({ title: '', category: '', location: '', description: '' }); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
+  function update(key, value) { setForm((current) => ({ ...current, [key]: value })) }
+  async function submit(event) { event.preventDefault(); setError(''); setBusy(true); try { await api.post('/complaints', form); navigate('/dashboard') } catch (err) { setError(err.response?.data?.message || 'Could not submit your complaint.') } finally { setBusy(false) } }
+  return <main className="app-page narrow"><Link className="back-link" to="/dashboard">← Back to workspace</Link><div className="page-heading compact"><div><p className="kicker">Make a signal</p><h1>What needs <em>attention?</em></h1><p className="lead">Be specific. Clear context helps the right person act faster.</p></div></div><form className="form-panel wide" onSubmit={submit}>{error && <div className="alert">{error}</div>}<label>Title<input required maxLength="120" placeholder="A short description of the issue" value={form.title} onChange={(e) => update('title', e.target.value)} /></label><div className="form-grid"><label>Category<select required value={form.category} onChange={(e) => update('category', e.target.value)}><option value="">Choose one</option>{categories.map((category) => <option key={category}>{category}</option>)}</select></label><label>Location <span className="optional">optional</span><input value={form.location} onChange={(e) => update('location', e.target.value)} placeholder="e.g. Block B, room 204" /></label></div><label>What happened?<textarea required maxLength="2000" rows="7" placeholder="Tell us what you noticed and how it affects students..." value={form.description} onChange={(e) => update('description', e.target.value)} /></label><button className="button button-dark" disabled={busy}>{busy ? 'Sending...' : 'Submit complaint'} <span>↗</span></button></form></main>
+}
