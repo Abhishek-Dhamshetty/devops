@@ -1,0 +1,35 @@
+name: Docker image builds
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-backend-image:
+    name: Build backend image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build backend Docker image
+        run: docker build --file backend/Dockerfile --tag campus-voice-backend:ci ./backend
+
+  build-frontend-image:
+    name: Build frontend image
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build frontend Docker image
+        run: docker build --file frontend/Dockerfile --build-arg VITE_API_URL=http://localhost:5001/api --tag campus-voice-frontend:ci ./frontend
